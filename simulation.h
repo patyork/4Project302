@@ -2,6 +2,7 @@
 #define SIMULATION_H
 
 #include "jobQueue.h"
+#include <fstream>
 
 class simulation
 {
@@ -25,6 +26,9 @@ class simulation
 		// The number of CPUs
 		int numberOfCPUs;
 		
+		// Output File stream for CpuSim.out
+		std::ofstream oFile;
+		
 		// Whether there is an empty spot in any of the CPU queues
 		bool isEmptyinCPUs( jobQueue cpu[] );
 		
@@ -32,6 +36,9 @@ class simulation
 		job createRandomJob( float currTime, int jobNum );
 	
 	public:
+	
+		// Constructor
+		simulation();
 	
 		// Initialize the simulation
 		void init();

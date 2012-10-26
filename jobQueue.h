@@ -53,6 +53,9 @@ class jobQueue
 		
 		// Clear the queue
 		void clear();
+		
+		// Returns a copy of the front of the Queue
+		job copyFront();
 };
 
 

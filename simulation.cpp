@@ -4,8 +4,20 @@
 #include <cstdlib>
 #include "jobQueue.h"
 #include "simulation.h"
+#include <iomanip>
+#include <cmath>
 
 
+// Constructor
+simulation::simulation()
+{
+	oFile.open("CpuSim.out");
+	if( !oFile.good() )
+	{
+		std::cout << "ERROR" <<std::endl << "Could not open CpuSim.out for writing!" << std::endl;
+		exit(0);
+	}
+}
 
 // Whether there is an empty spot in any of the CPU queues
 bool simulation::isEmptyinCPUs( jobQueue cpu[] )
@@ -20,6 +32,7 @@ bool simulation::isEmptyinCPUs( jobQueue cpu[] )
 // Create a new job (but don't enqueue it)
 job simulation::createRandomJob( float currTime, int jobNum )
 {
+	using namespace std;
 	int random = rand() % 1000;
 				
 	// if it's an IO job
@@ -45,7 +58,10 @@ job simulation::createRandomJob( float currTime, int jobNum )
 		else
 		{
 			newJob.setTimeRequired( 60.f );
-		}
+		}											
+		
+		oFile << "New Job: #" << jobNum << "; Job Class: I/O; Time Required: " << newJob.getTimeRequired() << "; Time Entered: "
+			 << currTime << endl;
 			
 		return newJob;
 	}
@@ -72,6 +88,9 @@ job simulation::createRandomJob( float currTime, int jobNum )
 		{
 			newJob.setTimeRequired( 60.f );
 		}
+		
+		oFile << "New Job: #" << jobNum << "; Job Class: CPU; Time Required: " << newJob.getTimeRequired() << "; Time Entered: "
+			 << currTime << endl;
 		
 		return newJob;
 	}
@@ -146,6 +165,21 @@ void simulation::init()
 		
 		return;
 	}
+	
+	oFile << "Number of Jobs to Process: " << numberOfJobs << endl
+		<< "Number of CPUs: " << numberOfCPUs << endl
+		<< "Probability of 1 Job entering every 0.1s: " << probOne << endl
+		<< "Probability of 2 Jobs entering every 0.1s: " << probTwo << endl
+		<< endl << "DISTRIBUTION OF SERVICE TIMES" << endl
+		<< "Percentage of jobs take 10 seconds of processing time: " << distTimes[0] << endl
+		<< "Percentage of jobs take 20 seconds of processing time: " << distTimes[1] << endl
+		<< "Percentage of jobs take 30 seconds of processing time: " << distTimes[2] << endl
+		<< "Percentage of jobs take 60 seconds of processing time: " << distTimes[3] << endl
+		<< endl << "DISTRIBUTION OF JOB CLASSES" << endl
+		<< "Percentage of I/O bound jobs: " << distTypes[0] << endl
+		<< "Percentage of CPU bound jobs: " << distTypes[1] << endl <<endl
+		<< "Start of the log File" << endl
+		<< "--------------------------------------" << endl;
 	
 }	
 		
@@ -266,11 +300,14 @@ void simulation::run()
 					// Determine job class, and job service time
 					if( a.getJobType() == IO ) numberOfIOJobs++;
 					else numberOfCPUJobs++;
-					
 					if( a.getTimeRequired() == 10.0 ) numberOf10++;
 					else if( a.getTimeRequired() == 20.0 ) numberOf20++;
 					else if( a.getTimeRequired() == 30.0 ) numberOf30++;
 					else numberOf60++;
+					
+					// Write out to file
+					oFile << "Job Finished: #" << a.getJobNumber() << "; Job Class: " << a.getJobType()
+						 << "; Time Required: " << a.getTimeRequired() << "; Time Completed: " << currentTime << endl;
 					
 					/////////// Do something with the fact that a job has been completed
 						//TODO calculate elapsed time for statistics
@@ -300,10 +337,26 @@ void simulation::run()
 		}
 		
 		
+		// Print out every 60s
+		if( int(currentTime * 10) % 600 == 0 && currentTime >0.0f )
+		{
+			oFile << endl << endl << "STATUS SUMMARY| Time: " << currentTime << endl
+				 << "----------------------------------" << endl
+				 << "Jobs in the Wait Queue: " << waitList.getLength() << endl
+				 << "	 Job at the front: #" << (waitList.copyFront()).getJobNumber() << endl;
+				 
+			for( int i=0; i<numberOfCPUs; i++ )
+			{
+				oFile << "Jobs in CPU #" << i << "'s Queue: " << cpuList[i].getLength() << endl
+					 << "	 Job at the front: #" << (cpuList[i].copyFront()).getJobNumber() << endl;
+			}
+			
+			oFile << endl << "END STATUS SUMMARY" << endl << endl;
+		}
+		
+		
 		// Increment the time counter
 		currentTime += 0.1f;
-		
-		cout << currentTime << "   " << jobsDone << endl;
 	}
 	
 	float CPUPercentBusy = ( (numberOfCPUs * currentTime) - cpuIdle ) / (numberOfCPUs * currentTime) * 100;
@@ -314,8 +367,9 @@ void simulation::run()
 		if( timeInCPU == 0.0f ) avgCPU = 0.0f;
 
 	
-	cout << "Simulation Over" << endl
-		<< "Simulation Time: " << currentTime << endl << endl
+	// Echo print to screen
+	cout << "Simulation Over" << endl << endl
+		<< "Total Simulation Time: " << currentTime << endl << endl
 		<< "Number of IO Jobs: " << numberOfIOJobs << endl
 		<< "Number of CPU Jobs: " << numberOfCPUJobs << endl
 		<< "Number of 10s Jobs: " << numberOf10 << endl
@@ -326,6 +380,21 @@ void simulation::run()
 		<< "Through-put: " << thruPut << " jobs/hour" << endl
 		<< "Average Time in Wait Queue: " << avgWait << "s" << endl
 		<< "Average Time in CPU Queue: " << avgCPU << "s" << endl;
+	
+	// Print to file
+	oFile << endl << endl << "------------------------------------" << endl
+		<< "Total Simulation Time     : " << currentTime << endl << endl
+		<< "Number of IO Jobs         : " << numberOfIOJobs << endl
+		<< "Number of CPU Jobs        : " << numberOfCPUJobs << endl
+		<< "Number of 10s Jobs        : " << numberOf10 << endl
+		<< "Number of 20s Jobs        : " << numberOf20 << endl
+		<< "Number of 30s Jobs        : " << numberOf30 << endl
+		<< "Number of 60s Jobs        : " << numberOf60 << endl << endl
+		<< "Percent of time CPU Busy  : " << CPUPercentBusy << endl
+		<< "Through-put               : " << thruPut << " jobs/hour" << endl
+		<< "Average Time in Wait Queue: " << avgWait << "s" << endl
+		<< "Average Time in CPU Queue : " << avgCPU << "s" << endl;
 		
+	oFile.close();
 		
 }

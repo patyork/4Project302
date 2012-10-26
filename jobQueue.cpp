@@ -106,4 +106,10 @@ void jobQueue::clear()
 	length = 0;
 }
 
+job jobQueue::copyFront()
+{
+	job temp = jobs[front];
+	return temp;
+}
+
 
