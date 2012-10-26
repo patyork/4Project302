@@ -348,7 +348,7 @@ void simulation::run()
 			for( int i=0; i<numberOfCPUs; i++ )
 			{
 				oFile << "Jobs in CPU #" << i << "'s Queue: " << cpuList[i].getLength() << endl
-					 << "	 Job at the front: #" << (cpuList[i].copyFront()).getJobNumber() << endl;
+					 << "	 Job at the front: #" << (cpuList[i].copyFront()).getJobNumber()+1 << endl;
 			}
 			
 			oFile << endl << "END STATUS SUMMARY" << endl << endl;
