@@ -11,7 +11,7 @@ job::job()
 	timeServiced = -1.0f;
 	arrivalTime = -1.0f;
 	completionTime = -1.0f;
-	first = true;
+	last = true;
 }
 		
 // Parameterized Constructor
@@ -23,7 +23,7 @@ job::job( int num, jobType type, float timeReq, float timeServd, float timeArriv
 	timeServiced = timeServd;
 	arrivalTime = timeArrive;
 	completionTime = timeCompleted;
-	first = f;
+	last = f;
 }
 	
 // Return the Job Numer
@@ -63,9 +63,9 @@ float job::getCompletionTime() const
 }
 		
 // Return whether this is the first time this job has been serviced this timeslice
-bool job::firstService() const
+bool job::lastService() const
 {
-	return first;
+	return last;
 }
 		
 // Set the job number
@@ -91,6 +91,12 @@ void job::setTimeServiced( float t )
 {
 	timeServiced = t;
 }
+
+// Increment the time this job has been serviced by .1
+void job::incrementTimeServiced()
+{
+	timeServiced += 0.1f;
+}
 	  	
 // Set the arrival time of this job
 void job::setArrivalTime( float t )
@@ -105,9 +111,9 @@ void job::setCompletionTime( float t )
 }
 	  	
 // Set whether this is the first time this job had been serviced this timeslice
-void job::setFirstService( bool f )
+void job::setLastService( bool l )
 {
-	first = f;
+	last = l;
 }
 	  	
 

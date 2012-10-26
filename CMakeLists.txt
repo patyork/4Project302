@@ -33,9 +33,11 @@ include_directories(
 # source files. In this case the source files will be compiled into a
 # binary named tests
 add_executable(project4.out 
-  adt4_test.cpp
+  #adt4_test.cpp
   job.cpp
   jobQueue.cpp
+  simulation.cpp
+  prog4.cpp
 )
 
 # The target_link_libraries takes a binary name and a library

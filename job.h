@@ -24,8 +24,8 @@ class job
 		// Completion Time
 		float completionTime;
 		
-		// Is this the first time it's been serviced for this timeslice?
-		bool first;
+		// Is this the last time this job needs to be serviced?
+		bool last;
 	
 	public:
 		
@@ -55,7 +55,7 @@ class job
 		float getCompletionTime() const;
 		
 		// Return whether this is the first time this job has been serviced this timeslice
-		bool firstService() const;
+		bool lastService() const;
 		
 	  //setters
 	  	// Set the job number
@@ -70,6 +70,9 @@ class job
 	  	// Set the amount of time this job has been serviced thus far
 	  	void setTimeServiced( float t );
 	  	
+	  	// Increment the time this job has been serviced by .1
+	  	void incrementTimeServiced();
+	  	
 	  	// Set the arrival time of this job
 	  	void setArrivalTime( float t );
 	  	
@@ -77,7 +80,7 @@ class job
 	  	void setCompletionTime( float t );
 	  	
 	  	// Set whether this is the first time this job had been serviced this timeslice
-	  	void setFirstService( bool f );
+	  	void setLastService( bool l );
 	  	
 	  	
 	

@@ -6,11 +6,11 @@
 // Default constructor
 jobQueue::jobQueue()
 {
-	jobs = NULL;
 	front = 0;
 	rear = 0;
-	maxSize = 0;
+	maxSize = 5;
 	length = 0;
+	jobs = new job[maxSize];
 }
 		
 // Parameterized constructor
