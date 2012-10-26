@@ -159,9 +159,7 @@ void simulation::run()
 	
 	// Set up the CPU Queues
 	jobQueue cpuList[numberOfCPUs];
-	float cpuIdle[numberOfCPUs];
-	for( int i=0; i<numberOfCPUs; i++ )
-		cpuIdle[i] = 0.0f;
+	float cpuIdle = 0.0f;
 	
 	// Job counter, job done counter
 	int jobCounter = 0, jobsDone = 0;
@@ -172,11 +170,16 @@ void simulation::run()
 	// Initialize random number generator
 	srand ( time(NULL) );
 	
+	// Statistic Variables
+	int numberOfIOJobs = 0, numberOfCPUJobs = 0,
+		numberOf10=0, numberOf20=0, numberOf30=0, numberOf60=0;
+	float timeInWait=0.0f, timeInCPU=0.0f;
+	
 	// Main simulation loop
 	while( jobsDone < numberOfJobs )
 	{
 		// Job creation
-		if( !waitList.isFull() && jobCounter < numberOfJobs )
+		if( waitList.getLength() + numberOfCPUs+1 < 100 && jobCounter < numberOfJobs )
 		{
 			// Generate a random number 0-999
 			int random = rand() % 1000;
@@ -188,16 +191,23 @@ void simulation::run()
 				waitList.enqueue( createRandomJob( currentTime, jobCounter ) );
 				
 				jobCounter++;
-				//cout << " New Job Added to the Wait Queue " << endl;
+			
+				
+				//TODO print out to file a new job has been created
 			}
 			else if ( random < ( (probOne * 1000)+(probTwo * 1000) ) )
 			{
 				// Enqueue two jobs
 				waitList.enqueue( createRandomJob( currentTime, jobCounter ) );
 				jobCounter++;
-				waitList.enqueue( createRandomJob( currentTime, jobCounter ) );
-				jobCounter++;
-				//cout << " Two New Jobs Added to the Wait Queue " << endl;
+				if( !waitList.isFull() && jobCounter < numberOfJobs )
+				{
+					waitList.enqueue( createRandomJob( currentTime, jobCounter ) );
+					jobCounter++;
+				}
+				
+				
+				//TODO print out to file a new job has been created
 			}
 		
 		} // End job creation
@@ -222,9 +232,19 @@ void simulation::run()
 			// Move from waitlist into the shortest CPU queue
 			cpuList[shortestQueue].enqueue( waitList.dequeue() );
 			
-			//cout << " Job Moved from Wait Queue into CPU " << shortestQueue << "'s Queue " << endl;
-			
 		}// End fill CPU Queues
+		
+		
+		// Check the Waitlist times
+		timeInWait += waitList.getLength() * 0.1;
+		
+		//Check the CPU wait times
+		int tempNumCPU = 0;
+		for( int i=0; i<numberOfCPUs; i++ )
+		{
+			tempNumCPU += cpuList[i].getLength();
+		}
+		timeInCPU += tempNumCPU * 0.1f;
 		
 		
 		// Process a job timeslice in each CPU
@@ -236,17 +256,25 @@ void simulation::run()
 				a.incrementTimeServiced();
 			
 				// Check if the job has been completely serviced
-				if( a.getTimeRequired() - a.getTimeServiced() < 0.05f )
+				if( a.getTimeRequired() - a.getTimeServiced() < 1.0f )
 				{
 					jobsDone++;
 					
 					// Set completion time
 					a.setCompletionTime( currentTime );
 					
+					// Determine job class, and job service time
+					if( a.getJobType() == IO ) numberOfIOJobs++;
+					else numberOfCPUJobs++;
+					
+					if( a.getTimeRequired() == 10.0 ) numberOf10++;
+					else if( a.getTimeRequired() == 20.0 ) numberOf20++;
+					else if( a.getTimeRequired() == 30.0 ) numberOf30++;
+					else numberOf60++;
+					
 					/////////// Do something with the fact that a job has been completed
 						//TODO calculate elapsed time for statistics
 						
-					cout << " Job #" << a.getJobNumber() << " Finished!" << endl;
 				}
 				// else if the job was a CPU bound job and has to be Priority Enqueued
 				else if( !a.lastService() )
@@ -256,31 +284,48 @@ void simulation::run()
 					
 					// Priority enqueue
 					cpuList[i].priorityEnqueue( a );
-					
-					cout << " Job #" << a.getJobNumber() << " has " << a.getTimeRequired() - a.getTimeServiced() << endl;
 				}
 				else // else the job need to be sent back to the wait list
 				{
+					// If it's a CPU job, reset the flag
 					if( a.getJobType() == CPU ) a.setLastService(false);
 					waitList.enqueue( a );
-					
-					cout << " Job #" << a.getJobNumber() << " has " << a.getTimeRequired() - a.getTimeServiced() << endl;
-					
-					//cout << " Job #" << a.getJobNumber() << " put back in wait list!" << endl;
 				}
 			}
 			else
 			{
-				// Increase this CPUs idle time
-				cpuIdle[i] += 0.1f;
+				// Increase CPU idle time
+				cpuIdle += 0.1f;
 			}
 		}
 		
 		
 		// Increment the time counter
 		currentTime += 0.1f;
+		
+		cout << currentTime << "   " << jobsDone << endl;
 	}
 	
+	float CPUPercentBusy = ( (numberOfCPUs * currentTime) - cpuIdle ) / (numberOfCPUs * currentTime) * 100;
+	float thruPut = numberOfJobs / (currentTime / 3600);
+	float avgWait = (timeInWait / numberOfJobs ) / 10;
+		if( timeInWait == 0.0f ) avgWait = 0.0f;
+	float avgCPU = (timeInCPU / numberOfJobs )/10;
+		if( timeInCPU == 0.0f ) avgCPU = 0.0f;
+
+	
 	cout << "Simulation Over" << endl
-		<< "Simulation Time: " << currentTime << endl;
+		<< "Simulation Time: " << currentTime << endl << endl
+		<< "Number of IO Jobs: " << numberOfIOJobs << endl
+		<< "Number of CPU Jobs: " << numberOfCPUJobs << endl
+		<< "Number of 10s Jobs: " << numberOf10 << endl
+		<< "Number of 20s Jobs: " << numberOf20 << endl
+		<< "Number of 30s Jobs: " << numberOf30 << endl
+		<< "Number of 60s Jobs: " << numberOf60 << endl << endl
+		<< "Percent of time CPU Busy: " << CPUPercentBusy << endl
+		<< "Through-put: " << thruPut << " jobs/hour" << endl
+		<< "Average Time in Wait Queue: " << avgWait << "s" << endl
+		<< "Average Time in CPU Queue: " << avgCPU << "s" << endl;
+		
+		
 }
