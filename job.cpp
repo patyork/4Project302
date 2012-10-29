@@ -15,7 +15,7 @@ job::job()
 }
 		
 // Parameterized Constructor
-job::job( int num, jobType type, float timeReq, float timeServd, float timeArrive, float timeCompleted, bool f )
+job::job( int num, jobType type, double timeReq, double timeServd, double timeArrive, double timeCompleted, bool f )
 {
 	number = num;
 	jobClass = type;
@@ -39,25 +39,25 @@ jobType job::getJobType() const
 }
 		
 // Return the time this job requires
-float job::getTimeRequired() const
+double job::getTimeRequired() const
 {
 	return timeRequired;
 }
 		
 //Return the time this job has been serviced thus far
-float job::getTimeServiced() const
+double job::getTimeServiced() const
 {
 	return timeServiced;
 }
 		
 //Return the arrival time of this job
-float job::getArrivalTime() const
+double job::getArrivalTime() const
 {
 	return arrivalTime;
 }
 		
 // Return the completion time of this job
-float job::getCompletionTime() const
+double job::getCompletionTime() const
 {
 	return completionTime;
 }
@@ -81,13 +81,13 @@ void job::setJobType( jobType t )
 }
 	  	
 //Set the amount time required for this job
-void job::setTimeRequired( float t )
+void job::setTimeRequired( double t )
 {
 	timeRequired = t;
 }
 	  	
 // Set the amount of time this job has been serviced thus far
-void job::setTimeServiced( float t )
+void job::setTimeServiced( double t )
 {
 	timeServiced = t;
 }
@@ -99,13 +99,13 @@ void job::incrementTimeServiced()
 }
 	  	
 // Set the arrival time of this job
-void job::setArrivalTime( float t )
+void job::setArrivalTime( double t )
 {
 	arrivalTime = t;
 }
 	  	
 // Set the Completion time of this job
-void job::setCompletionTime( float t )
+void job::setCompletionTime( double t )
 {
 	completionTime = t;
 }

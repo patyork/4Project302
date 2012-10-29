@@ -30,7 +30,7 @@ bool simulation::isEmptyinCPUs( jobQueue cpu[] )
 }
 
 // Create a new job (but don't enqueue it)
-job simulation::createRandomJob( float currTime, int jobNum )
+job simulation::createRandomJob( double currTime, int jobNum )
 {
 	using namespace std;
 	int random = rand() % 1000;
@@ -193,13 +193,13 @@ void simulation::run()
 	
 	// Set up the CPU Queues
 	jobQueue cpuList[numberOfCPUs];
-	float cpuIdle = 0.0f;
+	double cpuIdle = 0.0f;
 	
 	// Job counter, job done counter
 	int jobCounter = 0, jobsDone = 0;
 	
 	// The Current time
-	float currentTime = 0.0f;
+	double currentTime = 0.0f;
 	
 	// Initialize random number generator
 	srand ( time(NULL) );
@@ -207,7 +207,7 @@ void simulation::run()
 	// Statistic Variables
 	int numberOfIOJobs = 0, numberOfCPUJobs = 0,
 		numberOf10=0, numberOf20=0, numberOf30=0, numberOf60=0;
-	float timeInWait=0.0f, timeInCPU=0.0f;
+	double timeInWait=0.0f, timeInCPU=0.0f;
 	
 	// Main simulation loop
 	while( jobsDone < numberOfJobs )
@@ -359,11 +359,11 @@ void simulation::run()
 		currentTime += 0.1f;
 	}
 	
-	float CPUPercentBusy = ( (numberOfCPUs * currentTime) - cpuIdle ) / (numberOfCPUs * currentTime) * 100;
-	float thruPut = numberOfJobs / (currentTime / 3600);
-	float avgWait = (timeInWait / numberOfJobs ) / 10;
+	double CPUPercentBusy = ( (numberOfCPUs * currentTime) - cpuIdle ) / (numberOfCPUs * currentTime) * 100;
+	double thruPut = numberOfJobs / (currentTime / 3600);
+	double avgWait = (timeInWait / numberOfJobs ) / 10;
 		if( timeInWait == 0.0f ) avgWait = 0.0f;
-	float avgCPU = (timeInCPU / numberOfJobs )/10;
+	double avgCPU = (timeInCPU / numberOfJobs )/10;
 		if( timeInCPU == 0.0f ) avgCPU = 0.0f;
 
 	

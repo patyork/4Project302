@@ -12,16 +12,16 @@ class simulation
 		int numberOfJobs;
 		
 		// Probability of one job entering the system
-		float probOne;
+		double probOne;
 		
 		// Probability of two jobs entering the system
-		float probTwo;
+		double probTwo;
 		
 		// Distribution of required times
-		float distTimes[4];
+		double distTimes[4];
 		
 		// Distribution of job types
-		float distTypes[2];
+		double distTypes[2];
 		
 		// The number of CPUs
 		int numberOfCPUs;
@@ -33,7 +33,7 @@ class simulation
 		bool isEmptyinCPUs( jobQueue cpu[] );
 		
 		// Create a new job (but don't enqueue it)
-		job createRandomJob( float currTime, int jobNum );
+		job createRandomJob( double currTime, int jobNum );
 	
 	public:
 	
